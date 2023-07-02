@@ -30,7 +30,7 @@ end
 local function InsideRaidZone(self)
     local job = ESX.PlayerData.job.name
     local zoneData = self.zoneData
-    local progressData = self.progressData
+    local progressData = self.progressData -- (owner, zone, progress, blip)
     local locale = Config.Locales
     if progressData.owner == job then return end
     if IsControlJustReleased(0, 38) then

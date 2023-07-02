@@ -1,23 +1,31 @@
 local zoneInRaid = {}
 local zoneData = {}
-local playerData = {}
 local cooldownTime = 200
 local time = 0
 
-local function countTableValue(zone)
-    local counts = {}
-
-    for i, value in ipairs(zone) do
-        if counts[value] then
-            counts[value] = counts[value] + 1
-        else
-            counts[value] = 1
-        end
+local function setZoneData(zone, value, job)
+    if not zoneData[zone] then
+        zoneData[zone] = {}
     end
+    if not job then
+        zoneData[zone] = value
+        return
+    end
+    zoneData[zone][job] = value
 end
 
-local function getMostJob(zone)
-    countTableValue(zone)
+local function getZoneData(zone, job)
+    if not job then
+        return zoneData[zone]
+    end
+    return zoneData[zone][job] or {}
+end
+
+local function getBiggestJob(zone)
+    local counts = {}
+    for job, value in pairs(zone) do
+        counts[job] = #value
+    end
     local greatestJobs = {}
     local maxCount = 0
 
@@ -29,14 +37,12 @@ local function getMostJob(zone)
             table.insert(greatestJobs, key)
         end
     end
-
     return greatestJobs
 end
 
 local function updateStatus(data)
-    local biggestJob = getMostJob(zoneData[data.zone])
+    -- local biggestJob = getBiggestJob(zoneData[data.zone])
     local canRaid = #biggestJob == 1
-    print(#biggestJob)
     data.isPaused = not canRaid
     data.biggestJob = biggestJob[1]
     for k,v in pairs(zoneData[data.zone]) do
@@ -45,15 +51,18 @@ local function updateStatus(data)
     end
 end
 
+-- AddEventHandler('onResourceStart', function(resourceName)
 MySQL.ready(function ()
     for k,v in pairs(Config.Zones) do
         local response = MySQL.single.await('SELECT * FROM `gangmap` WHERE zone = ?', {k})
         if not response then
             local newZone = MySQL.insert.await('INSERT INTO `gangmap` (zone, progress, owner) VALUES (?, ?, ?)', {k, 0, k})
         end
+        zoneData[k] = {}
         TriggerClientEvent('fusti_gangmap:setupZones', -1, response)
     end
 end)
+-- end)
 
 RegisterNetEvent('fusti_gangmap:server:stopRaid')
 AddEventHandler('fusti_gangmap:server:stopRaid', function(data)
@@ -74,20 +83,24 @@ end)
 
 RegisterNetEvent('fusti_gangmap:server:refreshPlayerList')
 AddEventHandler('fusti_gangmap:server:refreshPlayerList', function(zone, type, id)
-    if type == 'exit' then
-        if playerData[id] then
-            playerData[id] = nil
-        end
+    local xPlayer = ESX.GetPlayerFromId(id)
+    local job = xPlayer.getJob().name
+    local currentJobs = getZoneData(zone, job)
+    local inTable = ESX.Table.IndexOf(currentJobs, id)
+    if type == 'exit' and inTable > -1 then
+        zoneData[zone][job][inTable] = nil
     else
-        
-        -- local xPlayer = ESX.GetPlayerFromId(id)
-        -- local job = xPlayer.getJob().name
-        -- if playerData[id] then return end
-        -- playerData[id] = job
-        -- zoneData[zone] = playerData
-        -- biggestJob = getMostJob(zoneData[zone])
+        if inTable > -1 then return end
+        if not currentJobs then
+            currentJobs = {}
+        end
+        currentJobs[#currentJobs + 1] = id
+        setZoneData(zone, currentJobs, job)
     end
-    print(json.encode(zoneData, {indent = true}))
+    print(zoneData[zone][job][inTable]) -- nil
+    local biggestJob = getBiggestJob(zoneData[zone])
+    -- print(json.encode(biggestJob))
+    -- print(json.encode(zoneData, {indent = true}))
 end)
 
 -- RegisterNetEvent('fusti_gangmap:server:updateStatus')
