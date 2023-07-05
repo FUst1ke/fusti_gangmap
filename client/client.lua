@@ -38,6 +38,8 @@ local function InsideRaidZone(self)
         lib.callback('fusti_gangmap:checkStatus', false, function(started)
             if not started then
                 progressData.blip = self.blip
+                progressData.progress = 0
+                progressData.isPaused = false
                 TriggerServerEvent('fusti_gangmap:server:startRaid', progressData)
             end
         end, progressData.zone)
