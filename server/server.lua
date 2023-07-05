@@ -32,11 +32,7 @@ local function getBiggestJob(zone)
     for key, value in pairs(counts) do
         if value > maxCount then
             maxCount = value
-            greatestJobs = {key}
-        elseif value == maxCount and maxCount > 0 then
             table.insert(greatestJobs, key)
-        elseif value == 0 then
-            return
         end
     end
     return greatestJobs
@@ -83,14 +79,10 @@ end)
 
 RegisterNetEvent('fusti_gangmap:server:startRaid')
 AddEventHandler('fusti_gangmap:server:startRaid', function(data)
-    local ownerOfzone = ESX.GetExtendedPlayers('job', data.owner)
-    for _, xPlayer in pairs(ownerOfzone) do
-        xPlayer.triggerEvent('ox_lib:notify', {title = 'Információ', description = 'Megtámadták a bandád területét!'})
-    end
     zoneInRaid[data.zone] = true
     TriggerClientEvent('fusti_gangmap:client:startRaid', -1, data)
-    TriggerClientEvent('ox_lib:notify', source, {title = 'Információ',  description = 'Elindítottál egy raidet!'})
     setRaid(true, data)
+    TriggerClientEvent('ox_lib:notify', source, {title = 'Információ',  description = 'Elindítottál egy raidet!'})
 end)
 
 RegisterNetEvent('fusti_gangmap:server:refreshPlayerList')
@@ -124,10 +116,7 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, zone)
         })
         return true
     elseif not canStart then 
-        TriggerClientEvent('ox_lib:notify', source, {
-            title = 'Információ', 
-            description = 'A következő raidhez várj '..math.floor((cooldownTime - (currentTime - time)) / 60).." óra "..math.fmod((cooldownTime - (currentTime - time)), 60).. ' percet.'
-        }) 
+        TriggerClientEvent('ox_lib:notify', source, {title = 'Információ', description = 'A következő raidhez várj '..math.floor((cooldownTime - (currentTime - time)) / 60).." óra "..math.fmod((cooldownTime - (currentTime - time)), 60).. ' percet.'}) 
         return true
     else
         return false 
@@ -135,6 +124,11 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, zone)
 end)
 
 function setRaid(inRaid, data)
+    if not inRaid then return end
+    local ownerOfzone = ESX.GetExtendedPlayers('job', data.owner)
+    for _, xPlayer in pairs(ownerOfzone) do
+        xPlayer.triggerEvent('ox_lib:notify', {title = 'Információ', description = 'Megtámadták a bandád területét!'})
+    end
     CreateThread(function()
         while zoneInRaid[data.zone] do
             local sleep = 0
@@ -155,15 +149,8 @@ end
 RegisterServerEvent('esx:onPlayerDeath')
 AddEventHandler('esx:onPlayerDeath', function(data)
     local xPlayer = ESX.GetPlayerFromId(source)
-    local job = xPlayer.getJob().name
     local zone = xPlayer.getMeta('raidZone')
-    local currentJobs = getZoneData(zone, job)
-    local inTable = ESX.Table.IndexOf(currentJobs, source)
-    if inTable > -1 then
-        zoneData[zone][job][inTable] = nil
-        xPlayer.setMeta('raidZone', 'none')
-    end
-    biggestJob = getBiggestJob(zoneData[zone]) or {}
+    TriggerEvent('fusti_gangmap:server:refreshPlayerList', zone, 'exit', source)
 end)
 
 -- SERVER --
