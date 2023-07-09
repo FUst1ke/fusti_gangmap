@@ -164,3 +164,9 @@ AddEventHandler('fusti_gangmap:server:refreshPlayerList', function(zone, type, i
     biggestJob = getBiggestJob(zoneData[zone])
     print(json.encode(zoneData[zone], {indent = true}))
 end)
+
+RegisterCommand('raidzone', function(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local zone = xPlayer.getMeta('raidZone')
+    --- ide majd a rablás startot!
+end)

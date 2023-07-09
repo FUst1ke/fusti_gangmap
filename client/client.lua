@@ -23,8 +23,9 @@ local function ExitedRaidZone(self)
     local progressData = self.progressData
     local locale = Config.Locales
     progressData.blip = self.blip
-    lib.hideTextUI()
     TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', progressData.zone, 'exit', id)
+    Wait(1000)
+    lib.hideTextUI()
 end
 
 local function InsideRaidZone(self)
@@ -56,6 +57,7 @@ RegisterNetEvent('fusti_gangmap:client:stopRaid')
 AddEventHandler('fusti_gangmap:client:stopRaid', function(data)
     SetBlipFlashes(data.blip, false)
     SetBlipColour(data.blip, Config.JobColours[data.biggestJob] or Config.DefaultColour)
+    Wait(1000)
     lib.hideTextUI()
 end)
 
