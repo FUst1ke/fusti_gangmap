@@ -38,6 +38,8 @@ local function InsideRaidZone(self)
         lib.callback('fusti_gangmap:checkStatus', false, function(started)
             if not started then
                 progressData.blip = self.blip
+                progressData.progress = 0
+                progressData.isPaused = false
                 TriggerServerEvent('fusti_gangmap:server:startRaid', progressData)
             end
         end, progressData.zone)
@@ -51,9 +53,9 @@ AddEventHandler('fusti_gangmap:client:startRaid', function(data)
 end)
 
 RegisterNetEvent('fusti_gangmap:client:stopRaid')
-AddEventHandler('fusti_gangmap:client:stopRaid', function(data) -- itt setelje át a színét az új frakciónak
+AddEventHandler('fusti_gangmap:client:stopRaid', function(data)
     SetBlipFlashes(data.blip, false)
-    SetBlipColour(data.blip, Config.JobColours[data.biggestJob])
+    SetBlipColour(data.blip, Config.JobColours[data.biggestJob] or Config.DefaultColour)
     lib.hideTextUI()
 end)
 
@@ -65,7 +67,7 @@ AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid)
         lib.showTextUI(locale['zone']:format(data.zone)..'  \n '..locale['owner']:format(data.owner)..'  \n '..locale['progress']:format('Contested'))
         return
     end
-    if job == data.biggestJob then
+    if job == data.biggestJob and job ~= data.owner then
         lib.showTextUI(locale['zone']:format(data.zone)..'  \n '..locale['owner']:format(data.owner)..'  \n '..locale['progress']:format(data.progress)..'%')
     end
 end)

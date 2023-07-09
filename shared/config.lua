@@ -1,4 +1,5 @@
 Config = {}
+Config.DefaultColour = 83
 
 -- TODO: JOB NOTIFY WHEN IN ZONE IN RAID
 -- hát meg amúgy még nagyon sok minden van :)
@@ -16,7 +17,7 @@ Config.Zones = {
         coords = vec3(107.0143, -1942.6709, 20.8037),
         size = vec3(56.0, 57.0, 15.0),
         rotation = 340.0,
-        alpha = 100.0
+        alpha = 70.0
     }
 }
 
