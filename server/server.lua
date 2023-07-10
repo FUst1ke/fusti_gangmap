@@ -54,7 +54,7 @@ function updateStatus(data)
     data.biggestJob = biggestJob
     if data.biggestJob == data.owner and not ownerThread then
         ownerThread = true
-        startOwnerThread(data)
+        -- startOwnerThread(data)
     end
     for k,v in pairs(zoneData[data.zone]) do
         for _, i in pairs(v) do
@@ -65,44 +65,59 @@ function updateStatus(data)
 end
 
 function setRaid(inRaid, data)
+    local count = 0
     CreateThread(function()
         while zoneInRaid[data.zone] do
             local sleep = 0
             if data.progress < 100 and not data.isPaused then
                 data.progress = data.progress + 1
-                sleep = 100
+                sleep = 1000
             elseif data.progress == 100 then
                 TriggerEvent('fusti_gangmap:server:stopRaid', data, true)
                 updateDataBase(data)
                 break
             end
-            Wait(sleep)
             updateStatus(data)
-        end
-    end)
-end
-
-function startOwnerThread(data)
-    local count = 0
-    local sleep = 0
-    CreateThread(function()
-        while ownerThread do
-            if count < 10 then
-                count = count + 1
-                sleep = 1000
-            else
-                ownerThread = false
-                local ownerJob = ESX.GetExtendedPlayers('job', data.owner)
-                for _,xPlayer in pairs(ownerJob) do
-                    xPlayer.triggerEvent('ox_lib:notify', {title = 'Információ', description = 'Sikeresen visszaverted a raidet!', type = 'success'})
-                    TriggerEvent('fusti_gangmap:server:stopRaid', data, false)
+            if ownerThread then
+                if count < 10 then
+                    count = count + 1
+                    sleep = 1000
+                else
+                    ownerThread = false
+                    local ownerJob = ESX.GetExtendedPlayers('job', data.owner)
+                    for _,xPlayer in pairs(ownerJob) do
+                        xPlayer.triggerEvent('ox_lib:notify', {title = 'Információ', description = 'Sikeresen visszaverted a raidet!', type = 'success'})
+                        TriggerEvent('fusti_gangmap:server:stopRaid', data, false)
+                    end
+                    break
                 end
-                break
             end
             Wait(sleep)
         end
     end)
 end
+
+-- function startOwnerThread(data)
+--     local count = 0
+--     local sleep = 0
+--     CreateThread(function()
+--         while ownerThread do
+--             if count < 10 then
+--                 count = count + 1
+--                 sleep = 1000
+--             else
+--                 ownerThread = false
+--                 local ownerJob = ESX.GetExtendedPlayers('job', data.owner)
+--                 for _,xPlayer in pairs(ownerJob) do
+--                     xPlayer.triggerEvent('ox_lib:notify', {title = 'Információ', description = 'Sikeresen visszaverted a raidet!', type = 'success'})
+--                     TriggerEvent('fusti_gangmap:server:stopRaid', data, false)
+--                 end
+--                 break
+--             end
+--             Wait(sleep)
+--         end
+--     end)
+-- end
 
 lib.callback.register('fusti_gangmap:checkStatus', function(source, zone)
     local currentTime = os.time()
