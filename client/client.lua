@@ -32,6 +32,7 @@ local function setupBlip(blip, data, blipSprite)
             lib.requestStreamedTextureDict("jobs", false)
             exports['blip_info']:SetBlipInfoTitle(blipSprite, zoneData.label, false)
             exports['blip_info']:SetBlipInfoImage(blipSprite, "jobs", data.zone)
+            print("DATA OWNER", Config.Zones[data.owner].label)
             exports['blip_info']:AddBlipInfoText(blipSprite, locale['owner'], tostring(Config.Zones[data.owner].label))
             exports['blip_info']:AddBlipInfoName(blipSprite, locale['minMember'], tostring(zoneData.minMember))
             exports['blip_info']:AddBlipInfoText(blipSprite, locale['rewards'], "")
@@ -78,7 +79,7 @@ local function InsideRaidZone(self)
     local locale = Config.Locales
     if not Config.WhitelistedJobs[job] then return end
     if progressData.owner == job then return end
-    if IsControlJustReleased(0, 38) then
+    if IsControlJustReleased(0, Config.StartKey) then
         if not IsPedArmed(cache.ped, 4) then lib.notify({title = 'Információ', description = locale['no_weapon_in_hand'], type = 'error'}) return end
         lib.callback('fusti_gangmap:checkStatus', false, function(started)
             if not started then
@@ -106,7 +107,7 @@ RegisterNetEvent('fusti_gangmap:client:stopRaid')
 AddEventHandler('fusti_gangmap:client:stopRaid', function(data)
     local blip = Config.Zones[data.zone].blip
     SetBlipFlashes(blip, false)
-    SetBlipColour(blip, Config.JobColours[data.biggestJob] or Config.DefaultColour)
+    SetBlipColour(blip, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
     Wait(1000)
     lib.hideTextUI()
 end)
@@ -116,11 +117,11 @@ AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid)
     local locale = Config.Locales.progress
     local job = ESX.PlayerData.job.name
     if not canRaid then 
-        lib.showTextUI(locale['zone']:format(data.zone)..'  \n '..locale['owner']:format(data.owner)..'  \n '..locale['progress']:format(locale['contested']))
+        lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(locale['contested']))
         return
     end
     if job == data.biggestJob or job == data.owner then
-        lib.showTextUI(locale['zone']:format(data.zone)..'  \n '..locale['owner']:format(data.owner)..'  \n '..locale['progress']:format(data.progress)..'%')
+        lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(data.progress)..'%')
     end
 end)
 

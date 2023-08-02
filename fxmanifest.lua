@@ -23,3 +23,9 @@ shared_scripts {
 dependency {
     'blip_info' -- uncomment if you dont want to use it (Check Config.lua)
 }
+
+escrow_ignore {
+    'server/shared.lua',
+    'shared/config.lua',
+    'stream/jobs.ytd' -- it this even necessary?
+}

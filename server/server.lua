@@ -3,9 +3,13 @@ local zoneData = {}
 local cooldownTime = 200
 local ownerThread = false
 local time = 0
+local started = {}
 
-AddEventHandler('onClientResourceStart', function (resourceName)
-    if(GetCurrentResourceName() == resourceName) then
+-- inkább csinálj egy callback-et ami mindig kikéri az adott zóna tulaját, amikor vége van a raidnek akkor értelem szerűen beseteli a színt meg adatbázis frissítés lemegy,
+-- viszont amikor el akarod kezdeni a raidet akkor callback-el kérd ki hogy ki az owner, úgy egyszerűbb/cleanebb (???)
+
+RegisterNetEvent('esx:playerLoaded', function(player)
+    if not started[player] then
         MySQL.ready(function()
             for zone, data in pairs(Config.Zones) do
                 local response = MySQL.single.await('SELECT * FROM `gangmap` WHERE zone = ?', {zone})
@@ -13,9 +17,12 @@ AddEventHandler('onClientResourceStart', function (resourceName)
                     local newZone = MySQL.insert.await('INSERT INTO `gangmap` (zone, owner) VALUES (?, ?)', {zone, zone})
                 end
                 Wait(1000)
-                TriggerClientEvent('fusti_gangmap:setupZones', source, response)
+                TriggerClientEvent('fusti_gangmap:setupZones', player, response)
             end
         end)
+        started[player] = true
+    else
+        return
     end
 end)
 
@@ -74,7 +81,7 @@ local function setRaid(inRaid, data)
             local sleep = 0
             if data.progress < 100 and not data.isPaused then
                 data.progress = data.progress + 1
-                sleep = 1000
+                sleep = 100
             elseif data.progress == 100 then
                 TriggerEvent('fusti_gangmap:server:stopRaid', data, true)
                 break
@@ -118,8 +125,11 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data)
     end
 end)
 
-RegisterNetEvent('fusti_gangmap:server:stopRaid')
+RegisterServerEvent('fusti_gangmap:server:stopRaid')
 AddEventHandler('fusti_gangmap:server:stopRaid', function(data, success)
+    for _,i in pairs(zoneData[data.zone][data.biggestJob]) do
+        print("_:", _, "ID: ", i)
+    end
     if success then
         data.owner = data.biggestJob
         local updatedZone = MySQL.update.await('UPDATE gangmap SET owner = ? WHERE zone = ?', {
@@ -135,9 +145,10 @@ end)
 
 RegisterNetEvent('fusti_gangmap:server:startRaid')
 AddEventHandler('fusti_gangmap:server:startRaid', function(data)
+    local locale = Config.Locales
     zoneInRaid[data.zone] = true
     TriggerClientEvent('fusti_gangmap:client:startRaid', -1, data)
-    notify(source, locale['information'], 'Elindítottál egy raidet!')
+    notify(source, locale['information'], locale['raid_started'])
     setRaid(true, data)
 end)
 
@@ -161,12 +172,5 @@ AddEventHandler('fusti_gangmap:server:refreshPlayerList', function(zone, type, i
         newJob[#newJob + 1] = id
     end
     biggestJob = getBiggestJob(zoneData[zone])
-end)
-
-RegisterCommand('raid', function(source)
-    local xPlayer = ESX.GetPlayerFromId(source)
-    local zone = xPlayer.getMeta('raidZone')
-    local data = zoneData[zone]
-    print(json.encode(data, {indent = true}))
-    --- ide majd a rablás startot!
+    print(json.encode(zoneData, {indent = true}))
 end)
