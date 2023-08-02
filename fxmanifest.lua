@@ -19,3 +19,7 @@ shared_scripts {
     '@ox_lib/init.lua',
     '@es_extended/imports.lua'
 }
+
+dependency {
+    'blip_info' -- uncomment if you dont want to use it (Check Config.lua)
+}

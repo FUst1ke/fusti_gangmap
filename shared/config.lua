@@ -1,9 +1,9 @@
 Config = {}
-Config.DefaultColour = 83
-
--- TODO: JOB NOTIFY WHEN IN ZONE IN RAID
--- hát meg amúgy még nagyon sok minden van :)
-
+Config.DefaultColour = 5
+Config.BlipInfo = {
+    Use = true,
+    OnlyForWhitelistedJobs = true
+}
 
 Config.Locales = {
     ['zone'] = 'Zóna: %s',
@@ -12,16 +12,31 @@ Config.Locales = {
     ['no_weapon_in_hand'] = 'Nincs nálad fegyver!'
 }
 
-Config.Zones = {
-    ["ambulance"] = {
-        coords = vec3(107.0143, -1942.6709, 20.8037),
-        size = vec3(56.0, 57.0, 15.0),
-        rotation = 340.0,
-        alpha = 70.0
-    }
+Config.WhitelistedJobs = {
+    ['police'] = true,
+    ['ambulance'] = true,
+    ['ballas'] = true
 }
 
-Config.JobColours = { -- https://docs.fivem.net/docs/game-references/blips/#blip-colors
-    ['police'] = 3,
-    ['ambulance'] = 6
+Config.Zones = {
+    ["grove"] = {
+        label = 'Grove Street Families',
+        coords = vec3(-993.8083, -3153.3833, 13.9444),
+        size = vec3(56.0, 57.0, 15.0),
+        alpha = 70.0,
+        rotation = 340.0,
+        minMember = 1,
+
+        reward = {
+            ['money'] = 3500,
+            ['bread'] = 5,
+            ['water'] = 3
+        },
+
+        blipData = {
+            colour = 6, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            sprite = 310,
+            scale = 1.0
+        }
+    }
 }
