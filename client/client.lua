@@ -2,6 +2,7 @@ local haveAccess = false
 
 local function setupBlip(blip, data, blipSprite)
     local zoneData = Config.Zones[data.zone]
+    local locale = Config.Locales
     SetBlipRotation(blip, zoneData.rotation)
     SetBlipColour(blip, zoneData.blipData.colour)
     SetBlipAlpha(blip, zoneData.alpha)
@@ -31,9 +32,9 @@ local function setupBlip(blip, data, blipSprite)
             lib.requestStreamedTextureDict("jobs", false)
             exports['blip_info']:SetBlipInfoTitle(blipSprite, zoneData.label, false)
             exports['blip_info']:SetBlipInfoImage(blipSprite, "jobs", data.zone)
-            exports['blip_info']:AddBlipInfoText(blipSprite, "Owner:", tostring(Config.Zones[data.owner].label))
-            exports['blip_info']:AddBlipInfoName(blipSprite, "Minimum member to attack:", tostring(zoneData.minMember))
-            exports['blip_info']:AddBlipInfoText(blipSprite, "Rewards:", "")
+            exports['blip_info']:AddBlipInfoText(blipSprite, locale['owner'], tostring(Config.Zones[data.owner].label))
+            exports['blip_info']:AddBlipInfoName(blipSprite, locale['minMember'], tostring(zoneData.minMember))
+            exports['blip_info']:AddBlipInfoText(blipSprite, locale['rewards'], "")
             
             for item, data in pairs(exports.ox_inventory:Items()) do
                 for k,v in pairs(zoneData.reward) do
@@ -44,7 +45,7 @@ local function setupBlip(blip, data, blipSprite)
             end
 
             exports['blip_info']:AddBlipInfoHeader(blipSprite, "")
-            exports['blip_info']:AddBlipInfoText(blipSprite, "When entering the zone, use the /raid command to start the raid!")
+            exports['blip_info']:AddBlipInfoText(blipSprite, locale['suggestion'])
         end
     end
 end
@@ -90,6 +91,10 @@ local function InsideRaidZone(self)
     end
 end
 
+RegisterNetEvent('esx:setJob', function(job)
+    ESX.PlayerData.job = job
+end)
+
 RegisterNetEvent('fusti_gangmap:client:startRaid')
 AddEventHandler('fusti_gangmap:client:startRaid', function(data)
     local blip = Config.Zones[data.zone].blip
@@ -108,10 +113,10 @@ end)
 
 RegisterNetEvent('fusti_gangmap:client:updateStatus')
 AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid)
-    local locale = Config.Locales
+    local locale = Config.Locales.progress
     local job = ESX.PlayerData.job.name
     if not canRaid then 
-        lib.showTextUI(locale['zone']:format(data.zone)..'  \n '..locale['owner']:format(data.owner)..'  \n '..locale['progress']:format('Contested'))
+        lib.showTextUI(locale['zone']:format(data.zone)..'  \n '..locale['owner']:format(data.owner)..'  \n '..locale['progress']:format(locale['contested']))
         return
     end
     if job == data.biggestJob or job == data.owner then

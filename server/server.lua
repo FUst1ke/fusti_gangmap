@@ -4,28 +4,22 @@ local cooldownTime = 200
 local ownerThread = false
 local time = 0
 
-MySQL.ready(function()
-    for k,v in pairs(Config.Zones) do
-        local response = MySQL.single.await('SELECT * FROM `gangmap` WHERE zone = ?', {k})
-        if not response then
-            local newZone = MySQL.insert.await('INSERT INTO `gangmap` (zone, owner) VALUES (?, ?)', {k, k})
-        end
-        Wait(1000)
-        TriggerClientEvent('fusti_gangmap:setupZones', -1, response)
+AddEventHandler('onClientResourceStart', function (resourceName)
+    if(GetCurrentResourceName() == resourceName) then
+        MySQL.ready(function()
+            for zone, data in pairs(Config.Zones) do
+                local response = MySQL.single.await('SELECT * FROM `gangmap` WHERE zone = ?', {zone})
+                if not response then
+                    local newZone = MySQL.insert.await('INSERT INTO `gangmap` (zone, owner) VALUES (?, ?)', {zone, zone})
+                end
+                Wait(1000)
+                TriggerClientEvent('fusti_gangmap:setupZones', source, response)
+            end
+        end)
     end
 end)
 
-local function notify(target, title, description, type, icon, position)
-    TriggerClientEvent('ox_lib:notify', target, {
-        title = title,
-        description = description,
-        type = type or 'inform',
-        icon = icon or nil,
-        position = position or 'top'
-    })
-end
-
-function getZoneData(zone, job)
+local function getZoneData(zone, job)
     if not zone then return end
     if not zoneData[zone] then
         zoneData[zone] = {}
@@ -39,7 +33,7 @@ function getZoneData(zone, job)
     return zoneData[zone][job]
 end
 
-function getBiggestJob(zone)
+local function getBiggestJob(zone)
     local counts = {}
     local min = 0
     local greatestJob = nil
@@ -57,7 +51,7 @@ function getBiggestJob(zone)
     return greatestJob
 end
 
-function updateStatus(data)
+local function updateStatus(data)
     local canRaid = biggestJob
     data.isPaused = not canRaid
     data.biggestJob = biggestJob
@@ -72,8 +66,9 @@ function updateStatus(data)
     end
 end
 
-function setRaid(inRaid, data)
+local function setRaid(inRaid, data)
     local count = 0
+    local locale = Config.Locales
     CreateThread(function()
         while zoneInRaid[data.zone] do
             local sleep = 0
@@ -93,7 +88,7 @@ function setRaid(inRaid, data)
                     ownerThread = false
                     local ownerJob = ESX.GetExtendedPlayers('job', data.owner)
                     for _,xPlayer in pairs(ownerJob) do
-                        notify(xPlayer.source, 'Információ', 'Sikeresen visszaverted a raidet!', 'success')
+                        notify(xPlayer.source, locale['information'], locale['raid_defended'], 'success')
                         TriggerEvent('fusti_gangmap:server:stopRaid', data, false)
                     end
                     break
@@ -108,29 +103,19 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data)
     local ownerJobCount = ESX.GetExtendedPlayers('job', data.owner)
     local currentTime = os.time()
     local canStart = (cooldownTime < currentTime - time)
+    local locale = Config.Locales
     if #ownerJobCount < Config.Zones[data.zone].minMember then
-        notify(source, 'Információ', 'Túl kevesen vannak a zóna foglalásához.', 'error')
+        notify(source, locale['information'], locale['no_enough_member'], 'error')
         return true
     elseif zoneInRaid[data.zone] then 
-        notify(source, 'Információ', 'Ez a zóna éppen foglaláshoz alatt áll.', 'error')
+        notify(source, locale['information'], locale['zone_already_in_raid'], 'error')
         return true
     elseif not canStart then 
-        notify(source, 'Információ', 'A következő foglaláshoz várj '..math.floor((cooldownTime - (currentTime - time)) / 60).." óra "..math.fmod((cooldownTime - (currentTime - time)), 60).. ' percet.', 'error')
+        notify(source, locale['information'], locale['you_have_to_wait']:format(math.floor((cooldownTime - (currentTime - time)) / 60), math.fmod((cooldownTime - (currentTime - time)))), 'error')
         return true
     else
         return false 
     end
-end)
-
-RegisterServerEvent('esx:onPlayerDeath')
-AddEventHandler('esx:onPlayerDeath', function(data)
-    local xVictim = ESX.GetPlayerFromId(source)
-    local xKiller = ESX.GetPlayerFromId(data.killerServerId)
-    local killer = {name = xKiller.getName(), job = xKiller.getJob().label}
-    local victim = {name = xVictim.getName(), job = xVictim.getJob().label}
-    local zone = xVictim.getMeta('raidZone')
-    TriggerEvent('fusti_gangmap:server:refreshPlayerList', zone, 'exit', source)
-    notify(data.killerServerId, 'Információ', 'Megölted '..victim.name..' játékost ('..victim.job..').')
 end)
 
 RegisterNetEvent('fusti_gangmap:server:stopRaid')
@@ -152,7 +137,7 @@ RegisterNetEvent('fusti_gangmap:server:startRaid')
 AddEventHandler('fusti_gangmap:server:startRaid', function(data)
     zoneInRaid[data.zone] = true
     TriggerClientEvent('fusti_gangmap:client:startRaid', -1, data)
-    notify(source, 'Információ', 'Elindítottál egy raidet!')
+    notify(source, locale['information'], 'Elindítottál egy raidet!')
     setRaid(true, data)
 end)
 
@@ -178,7 +163,7 @@ AddEventHandler('fusti_gangmap:server:refreshPlayerList', function(zone, type, i
     biggestJob = getBiggestJob(zoneData[zone])
 end)
 
-RegisterCommand('raidzone', function(source)
+RegisterCommand('raid', function(source)
     local xPlayer = ESX.GetPlayerFromId(source)
     local zone = xPlayer.getMeta('raidZone')
     local data = zoneData[zone]

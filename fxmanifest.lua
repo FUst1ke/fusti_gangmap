@@ -6,12 +6,12 @@ lua54 'yes'
 description 'gangmap script using ox_lib'
 
 client_scripts {
-    'client/client.lua'
+    'client/*.lua'
 }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
-    'server/server.lua',
+    'server/*.lua',
 }
 
 shared_scripts {
