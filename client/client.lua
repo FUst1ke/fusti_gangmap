@@ -99,7 +99,6 @@ RegisterNetEvent('fusti_gangmap:client:updateStatus')
 AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid) -- itt majd valami okosabbat légyszi
     local locale = Config.Locales.progress
     local job = ESX.PlayerData.job.name
-    -- print(not canRaid, job, data.biggestJob, data.owner)
     if not canRaid then 
         lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(locale['contested']))
         return
