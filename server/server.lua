@@ -1,12 +1,12 @@
+local locale = Config.Locales
+local ownerThread = false
 local zoneInRaid = {}
 local zoneData = {}
-local cooldownTime = 200
-local ownerThread = false
-local time = 0
 local started = {}
+local cooldownTime = 300 -- ennek a formatálását majd old meg!
+local time = 0
 
--- inkább csinálj egy callback-et ami mindig kikéri az adott zóna tulaját, amikor vége van a raidnek akkor értelem szerűen beseteli a színt meg adatbázis frissítés lemegy,
--- viszont amikor el akarod kezdeni a raidet akkor callback-el kérd ki hogy ki az owner, úgy egyszerűbb/cleanebb (???)
+-- itt majd nézd át a Config.Zones[data.zone].owner és a data.owner közti különbségeket, ugyan akkor frissíted be de nem ugyan azt adja vissza stb.(callbacknél)
 
 RegisterNetEvent('esx:playerLoaded', function(player)
     if not started[player] then
@@ -60,9 +60,11 @@ end
 
 local function updateStatus(data)
     local canRaid = biggestJob
+    local zoneOwner = Config.Zones[data.zone].owner or data.owner
     data.isPaused = not canRaid
     data.biggestJob = biggestJob
-    if data.biggestJob == data.owner and not ownerThread then
+    if data.biggestJob == zoneOwner and not ownerThread then
+        print("OWNERTHREAD TRUE", data.biggestJob, Config.Zones[data.zone].owner, data.owner)
         ownerThread = true
     end
     for k,v in pairs(zoneData[data.zone]) do
@@ -75,7 +77,7 @@ end
 
 local function setRaid(inRaid, data)
     local count = 0
-    local locale = Config.Locales
+    
     CreateThread(function()
         while zoneInRaid[data.zone] do
             local sleep = 0
@@ -93,7 +95,8 @@ local function setRaid(inRaid, data)
                     sleep = 1000
                 else
                     ownerThread = false
-                    local ownerJob = ESX.GetExtendedPlayers('job', data.owner)
+                    local zoneOwner = Config.Zones[data.zone].owner or data.owner
+                    local ownerJob = ESX.GetExtendedPlayers('job', zoneOwner)
                     for _,xPlayer in pairs(ownerJob) do
                         notify(xPlayer.source, locale['information'], locale['raid_defended'], 'success')
                         TriggerEvent('fusti_gangmap:server:stopRaid', data, false)
@@ -106,22 +109,32 @@ local function setRaid(inRaid, data)
     end)
 end
 
-lib.callback.register('fusti_gangmap:checkStatus', function(source, data)
-    local ownerJobCount = ESX.GetExtendedPlayers('job', data.owner)
+lib.callback.register('fusti_gangmap:checkStatus', function(source, data, playerId)
+    local zoneOwner = Config.Zones[data.zone].owner or data.owner
+    local ownerJobCount = ESX.GetExtendedPlayers('job', zoneOwner)
     local currentTime = os.time()
     local canStart = (cooldownTime < currentTime - time)
-    local locale = Config.Locales
-    if #ownerJobCount < Config.Zones[data.zone].minMember then
-        notify(source, locale['information'], locale['no_enough_member'], 'error')
-        return true
+    local xPlayer = ESX.GetPlayerFromId(playerId)
+    local job = xPlayer.getJob().name
+
+    print("ZONE:", data.zone, "YOUR JOB:", job, "ZONE OWNER:", zoneOwner)
+
+    if not Config.WhitelistedJobs[job] or zoneOwner == job then
+        notify(source, locale['information'], locale['cant_do_this'], 'error')
+        return false 
+    end
+
+    if not canStart then
+        notify(source, locale['information'], locale['you_have_to_wait']:format(math.floor((cooldownTime - (currentTime - time)) / 60), (cooldownTime - (currentTime - time))), 'error')
+        return false
     elseif zoneInRaid[data.zone] then 
         notify(source, locale['information'], locale['zone_already_in_raid'], 'error')
-        return true
-    elseif not canStart then 
-        notify(source, locale['information'], locale['you_have_to_wait']:format(math.floor((cooldownTime - (currentTime - time)) / 60), math.fmod((cooldownTime - (currentTime - time)))), 'error')
-        return true
+        return false
+    elseif #ownerJobCount < data.minMember then 
+        notify(source, locale['information'], locale['no_enough_member'], 'error')
+        return false
     else
-        return false 
+        return true 
     end
 end)
 
@@ -129,9 +142,14 @@ RegisterServerEvent('fusti_gangmap:server:stopRaid')
 AddEventHandler('fusti_gangmap:server:stopRaid', function(data, success)
     for _,i in pairs(zoneData[data.zone][data.biggestJob]) do
         print("_:", _, "ID: ", i)
+        local xPlayer = ESX.GetPlayerFromId(i)
+        print(xPlayer.getName())
     end
     if success then
         data.owner = data.biggestJob
+        Config.Zones[data.zone].owner = data.biggestJob
+        Config.Zones[data.zone].progress = 0
+        Config.Zones[data.zone].isPaused = false
         local updatedZone = MySQL.update.await('UPDATE gangmap SET owner = ? WHERE zone = ?', {
             data.biggestJob, 
             data.zone
@@ -145,7 +163,6 @@ end)
 
 RegisterNetEvent('fusti_gangmap:server:startRaid')
 AddEventHandler('fusti_gangmap:server:startRaid', function(data)
-    local locale = Config.Locales
     zoneInRaid[data.zone] = true
     TriggerClientEvent('fusti_gangmap:client:startRaid', -1, data)
     notify(source, locale['information'], locale['raid_started'])
@@ -172,5 +189,4 @@ AddEventHandler('fusti_gangmap:server:refreshPlayerList', function(zone, type, i
         newJob[#newJob + 1] = id
     end
     biggestJob = getBiggestJob(zoneData[zone])
-    print(json.encode(zoneData, {indent = true}))
 end)

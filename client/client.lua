@@ -1,8 +1,8 @@
 local haveAccess = false
+local locale = Config.Locales
 
 local function setupBlip(blip, data, blipSprite)
-    local zoneData = Config.Zones[data.zone]
-    local locale = Config.Locales
+    local zoneData = Config.Zones[data.owner]
     SetBlipRotation(blip, zoneData.rotation)
     SetBlipColour(blip, zoneData.blipData.colour)
     SetBlipAlpha(blip, zoneData.alpha)
@@ -32,7 +32,6 @@ local function setupBlip(blip, data, blipSprite)
             lib.requestStreamedTextureDict("jobs", false)
             exports['blip_info']:SetBlipInfoTitle(blipSprite, zoneData.label, false)
             exports['blip_info']:SetBlipInfoImage(blipSprite, "jobs", data.zone)
-            print("DATA OWNER", Config.Zones[data.owner].label)
             exports['blip_info']:AddBlipInfoText(blipSprite, locale['owner'], tostring(Config.Zones[data.owner].label))
             exports['blip_info']:AddBlipInfoName(blipSprite, locale['minMember'], tostring(zoneData.minMember))
             exports['blip_info']:AddBlipInfoText(blipSprite, locale['rewards'], "")
@@ -53,42 +52,26 @@ end
 
 local function EnteredRaidZone(self)
     local id = GetPlayerServerId(PlayerId())
-    local job = ESX.PlayerData.job.name
-    local zoneData = self.zoneData
-    local progressData = self.progressData
-    local locale = Config.Locales
-    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', progressData.zone, 'enter', id)
-    if progressData.owner == job then return end
+    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', self.zone, 'enter', id)
 end
 
 local function ExitedRaidZone(self)
     local id = GetPlayerServerId(PlayerId())
-    local zoneData = self.zoneData
-    local progressData = self.progressData
-    local locale = Config.Locales
-    progressData.blip = self.blip
-    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', progressData.zone, 'exit', id)
+    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', self.zone, 'exit', id)
     Wait(1000)
     lib.hideTextUI()
 end
 
 local function InsideRaidZone(self)
-    local job = ESX.PlayerData.job.name
-    local zoneData = self.zoneData
-    local progressData = self.progressData
-    local locale = Config.Locales
-    if not Config.WhitelistedJobs[job] then return end
-    if progressData.owner == job then return end
+    local id = GetPlayerServerId(PlayerId())
+    local zoneData = Config.Zones[self.zone]
     if IsControlJustReleased(0, Config.StartKey) then
-        if not IsPedArmed(cache.ped, 4) then lib.notify({title = 'Információ', description = locale['no_weapon_in_hand'], type = 'error'}) return end
-        lib.callback('fusti_gangmap:checkStatus', false, function(started)
-            if not started then
-                progressData.blip = self.blip
-                progressData.progress = 0
-                progressData.isPaused = false
-                TriggerServerEvent('fusti_gangmap:server:startRaid', progressData)
+        -- if not IsPedArmed(cache.ped, 4) then lib.notify({title = 'Információ', description = locale['no_weapon_in_hand'], type = 'error'}) return end
+        lib.callback('fusti_gangmap:checkStatus', false, function(canStart)
+            if canStart then
+                TriggerServerEvent('fusti_gangmap:server:startRaid', zoneData)
             end
-        end, progressData)
+        end, zoneData, id)
     end
 end
 
@@ -113,14 +96,17 @@ AddEventHandler('fusti_gangmap:client:stopRaid', function(data)
 end)
 
 RegisterNetEvent('fusti_gangmap:client:updateStatus')
-AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid)
+AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid) -- itt majd valami okosabbat légyszi
     local locale = Config.Locales.progress
     local job = ESX.PlayerData.job.name
+    -- print(not canRaid, job, data.biggestJob, data.owner)
     if not canRaid then 
         lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(locale['contested']))
         return
     end
+    print(canRaid, job, data.biggestJob, data.owner)
     if job == data.biggestJob or job == data.owner then
+        print("BELEMEGY")
         lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(data.progress)..'%')
     end
 end)
@@ -133,17 +119,20 @@ AddEventHandler('fusti_gangmap:setupZones', function(data)
     end
     local blip = AddBlipForArea(zoneData.coords, zoneData.size.x, zoneData.size.y)
     local blipSprite = AddBlipForCoord(zoneData.coords)
-    Config.Zones[data.zone].blip = blip
     setupBlip(blip, data, blipSprite)
+    Config.Zones[data.zone].blip = blip
+    Config.Zones[data.zone].owner = data.owner
+    Config.Zones[data.zone].progress = 0
+    Config.Zones[data.zone].isPaused = false
+    Config.Zones[data.zone].zone = data.zone ---???
     local zone = lib.zones.box({
         coords = zoneData.coords,
         size = zoneData.size,
         rotation = zoneData.rotation,
-        debug = false,
+        debug = Config.Debug,
         onEnter = EnteredRaidZone,
         onExit = ExitedRaidZone,
         inside = InsideRaidZone,
-        zoneData = zoneData,
-        progressData = data
+        zone = data.zone
     })
 end)

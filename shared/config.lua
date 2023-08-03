@@ -23,6 +23,7 @@ Config.Locales = {
     ['you_have_to_wait'] = 'You have to wait %s hour and %s minute.',
     ['you_killed'] = 'You have killed player %s (%s).',
     ['raid_started'] = 'You have started a raid!',
+    ['cant_do_this'] = 'You can not do this at the moment!',
     -- blip info
     ['owner'] = 'Owner:',
     ['minMember'] = 'Minimum member to attack:',
@@ -38,7 +39,7 @@ Config.WhitelistedJobs = {
 
 Config.Zones = {
     ["police"] = {
-        label = 'Zone 1',
+        label = 'POLICE ZONE',
         coords = vec3(-993.8083, -3153.3833, 13.9444),
         size = vec3(56.0, 57.0, 15.0),
         alpha = 70.0,
@@ -52,13 +53,13 @@ Config.Zones = {
         },
 
         blipData = {
-            colour = 6, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            colour = 38, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
             sprite = 310,
             scale = 1.0
         }
     },
     ["ambulance"] = {
-        label = 'Zone 2',
+        label = 'AMBULANCE ZONE',
         coords = vec3(-1057.7834, -3309.5071, 13.9445),
         size = vec3(56.0, 57.0, 15.0),
         alpha = 70.0,
