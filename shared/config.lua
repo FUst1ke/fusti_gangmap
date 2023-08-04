@@ -20,7 +20,7 @@ Config.Locales = {
     ['raid_defended'] = 'You have successfully defended your zone!',
     ['no_enough_member'] = 'There are not enough players to start the raid.',
     ['zone_already_in_raid'] = 'The zone is already under raid.',
-    ['you_have_to_wait'] = 'You have to wait %s hour and %s minute.',
+    ['you_have_to_wait'] = 'You have to wait %s minute(s).',
     ['you_killed'] = 'You have killed player %s (%s).',
     ['raid_started'] = 'You have started a raid!',
     ['cant_do_this'] = 'You can not do this at the moment!',
@@ -38,12 +38,12 @@ Config.WhitelistedJobs = {
 }
 
 Config.Zones = {
-    ["police"] = {
-        label = 'POLICE ZONE',
-        coords = vec3(-993.8083, -3153.3833, 13.9444),
-        size = vec3(56.0, 57.0, 15.0),
+    ["grove"] = {
+        label = 'Grove Street Families',
+        coords = vec3(23.0, -1869.0, 41.0),
+        size = vec3(359.0, 94.0, 46.0),
+        rotation = 137.5,
         alpha = 70.0,
-        rotation = 340.0,
         minMember = 0,
 
         reward = {
@@ -53,17 +53,17 @@ Config.Zones = {
         },
 
         blipData = {
-            colour = 38, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            colour = 2, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
             sprite = 310,
             scale = 1.0
         }
     },
-    ["ambulance"] = {
-        label = 'AMBULANCE ZONE',
-        coords = vec3(-1057.7834, -3309.5071, 13.9445),
-        size = vec3(56.0, 57.0, 15.0),
+    ["ballas"] = {
+        label = 'Ballas',
+        coords = vec3(-112.0, -1531.0, 36.0),
+        size = vec3(204.0, 429.0, 54.0),
+        rotation = 320.0,
         alpha = 70.0,
-        rotation = 340.0,
         minMember = 0,
 
         reward = {
@@ -73,7 +73,67 @@ Config.Zones = {
         },
 
         blipData = {
-            colour = 6, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            colour = 27, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            sprite = 310,
+            scale = 1.0
+        }
+    },
+    ["vagos"] = {
+        label = 'Vagos Family',
+        coords = vec3(351.0, -2063.0, 30.0),
+        size = vec3(154.0, 154.0, 25),
+        rotation = 315.0,
+        alpha = 70.0,
+        minMember = 0,
+
+        reward = {
+            ['money'] = 3500,
+            ['bread'] = 5,
+            ['water'] = 3
+        },
+
+        blipData = {
+            colour = 46, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            sprite = 310,
+            scale = 1.0
+        }
+    },
+    ["crips"] = {
+        label = 'Crips',
+        coords = vec3(1256.0, -1672.0, 47.0),
+        size = vec3(214.0, 199.0, 44.0),
+        rotation = 15.0,
+        alpha = 70.0,
+        minMember = 0,
+
+        reward = {
+            ['money'] = 3500,
+            ['bread'] = 5,
+            ['water'] = 3
+        },
+
+        blipData = {
+            colour = 18, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
+            sprite = 310,
+            scale = 1.0
+        }
+    },
+    ["lostmc"] = {
+        label = 'Lost MC',
+        coords = vec3(998.5, -123.0, 85.0),
+        size = vec3(84.0, 115, 20.0),
+        rotation = 57.5,
+        alpha = 70.0,
+        minMember = 0,
+
+        reward = {
+            ['money'] = 3500,
+            ['bread'] = 5,
+            ['water'] = 3
+        },
+
+        blipData = {
+            colour = 10, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
             sprite = 310,
             scale = 1.0
         }

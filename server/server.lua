@@ -3,10 +3,12 @@ local ownerThread = false
 local zoneInRaid = {}
 local zoneData = {}
 local started = {}
-local cooldownTime = 300 -- ennek a formatálását majd old meg!
+local cooldownTime = 3600 -- ennek a formatálását majd old meg!
 local time = 0
 
 -- itt majd nézd át a Config.Zones[data.zone].owner és a data.owner közti különbségeket, ugyan akkor frissíted be de nem ugyan azt adja vissza stb.(callbacknél)
+-- azt is oldd meg hogy zónákon legyen a cooldown ne globálisan
+-- ROTATIONT ÁLLíTSD BE RENDESEN VAGY NEMTUDOM
 
 RegisterNetEvent('esx:playerLoaded', function(player)
     if not started[player] then
@@ -64,7 +66,6 @@ local function updateStatus(data)
     data.isPaused = not canRaid
     data.biggestJob = biggestJob
     if data.biggestJob == zoneOwner and not ownerThread then
-        print("OWNERTHREAD TRUE", data.biggestJob, Config.Zones[data.zone].owner, data.owner)
         ownerThread = true
     end
     for k,v in pairs(zoneData[data.zone]) do
@@ -125,7 +126,7 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data, player
     end
 
     if not canStart then
-        notify(source, locale['information'], locale['you_have_to_wait']:format(math.floor((cooldownTime - (currentTime - time)) / 60), (cooldownTime - (currentTime - time))), 'error')
+        notify(source, locale['information'], locale['you_have_to_wait']:format(math.floor((cooldownTime - (currentTime - time)) / 60)), 'error')
         return false
     elseif zoneInRaid[data.zone] then 
         notify(source, locale['information'], locale['zone_already_in_raid'], 'error')

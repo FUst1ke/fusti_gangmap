@@ -2,18 +2,20 @@ local haveAccess = false
 local locale = Config.Locales
 
 local function setupBlip(blip, data, blipSprite)
-    local zoneData = Config.Zones[data.owner]
-    SetBlipRotation(blip, zoneData.rotation)
-    SetBlipColour(blip, zoneData.blipData.colour)
-    SetBlipAlpha(blip, zoneData.alpha)
+    local zoneData = Config.Zones[data.zone]
+    local ownerColour = Config.Zones[data.owner].blipData.colour
+    print(zoneData.rotation)
+    SetBlipRotation(blip, data.rotation)
+    SetBlipColour(blip, ownerColour)
+    SetBlipAlpha(blip, data.alpha)
     SetBlipAsShortRange(blip, true)
     --
-    SetBlipSprite(blipSprite, zoneData.blipData.sprite)
-    SetBlipColour(blipSprite, zoneData.blipData.colour)
-    SetBlipScale(blipSprite, zoneData.blipData.scale)
+    SetBlipSprite(blipSprite, data.blipData.sprite)
+    SetBlipColour(blipSprite, ownerColour)
+    SetBlipScale(blipSprite, data.blipData.scale)
     SetBlipAsShortRange(blipSprite, true)
     BeginTextCommandSetBlipName('STRING')
-    AddTextComponentSubstringPlayerName(zoneData.label)
+    AddTextComponentSubstringPlayerName(data.label)
     EndTextCommandSetBlipName(blipSprite)
     --
     if Config.BlipInfo.OnlyForWhitelistedJobs then
@@ -89,8 +91,10 @@ end)
 RegisterNetEvent('fusti_gangmap:client:stopRaid')
 AddEventHandler('fusti_gangmap:client:stopRaid', function(data)
     local blip = Config.Zones[data.zone].blip
+    local blipSprite = Config.Zones[data.zone].blipSprite
     SetBlipFlashes(blip, false)
     SetBlipColour(blip, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
+    SetBlipColour(blipSprite, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
     Wait(1000)
     lib.hideTextUI()
 end)
@@ -118,12 +122,13 @@ AddEventHandler('fusti_gangmap:setupZones', function(data)
     end
     local blip = AddBlipForArea(zoneData.coords, zoneData.size.x, zoneData.size.y)
     local blipSprite = AddBlipForCoord(zoneData.coords)
-    setupBlip(blip, data, blipSprite)
     Config.Zones[data.zone].blip = blip
+    Config.Zones[data.zone].blipSprite = blipSprite
     Config.Zones[data.zone].owner = data.owner
     Config.Zones[data.zone].progress = 0
     Config.Zones[data.zone].isPaused = false
     Config.Zones[data.zone].zone = data.zone ---???
+    setupBlip(Config.Zones[data.zone].blip, Config.Zones[data.zone], Config.Zones[data.zone].blipSprite)
     local zone = lib.zones.box({
         coords = zoneData.coords,
         size = zoneData.size,
