@@ -8,7 +8,6 @@ local time = 0
 
 -- itt majd nézd át a Config.Zones[data.zone].owner és a data.owner közti különbségeket, ugyan akkor frissíted be de nem ugyan azt adja vissza stb.(callbacknél)
 -- azt is oldd meg hogy zónákon legyen a cooldown ne globálisan
--- ROTATIONT ÁLLíTSD BE RENDESEN VAGY NEMTUDOM
 
 RegisterNetEvent('esx:playerLoaded', function(player)
     if not started[player] then
@@ -26,6 +25,10 @@ RegisterNetEvent('esx:playerLoaded', function(player)
     else
         return
     end
+end)
+
+AddEventHandler('playerDropped', function()
+    started[source] = false
 end)
 
 local function getZoneData(zone, job)

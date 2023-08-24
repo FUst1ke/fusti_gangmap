@@ -42,8 +42,8 @@ Config.Zones = {
         label = 'Grove Street Families',
         coords = vec3(23.0, -1869.0, 41.0),
         size = vec3(359.0, 94.0, 46.0),
-        rotation = 137.5,
-        alpha = 70.0,
+        rotation = 137,
+        alpha = 60,
         minMember = 0,
 
         reward = {
@@ -62,8 +62,8 @@ Config.Zones = {
         label = 'Ballas',
         coords = vec3(-112.0, -1531.0, 36.0),
         size = vec3(204.0, 429.0, 54.0),
-        rotation = 320.0,
-        alpha = 70.0,
+        rotation = 320,
+        alpha = 60,
         minMember = 0,
 
         reward = {
@@ -82,8 +82,8 @@ Config.Zones = {
         label = 'Vagos Family',
         coords = vec3(351.0, -2063.0, 30.0),
         size = vec3(154.0, 154.0, 25),
-        rotation = 315.0,
-        alpha = 70.0,
+        rotation = 315,
+        alpha = 60,
         minMember = 0,
 
         reward = {
@@ -102,8 +102,8 @@ Config.Zones = {
         label = 'Crips',
         coords = vec3(1256.0, -1672.0, 47.0),
         size = vec3(214.0, 199.0, 44.0),
-        rotation = 15.0,
-        alpha = 70.0,
+        rotation = 15,
+        alpha = 60,
         minMember = 0,
 
         reward = {
@@ -122,8 +122,8 @@ Config.Zones = {
         label = 'Lost MC',
         coords = vec3(998.5, -123.0, 85.0),
         size = vec3(84.0, 115, 20.0),
-        rotation = 57.5,
-        alpha = 70.0,
+        rotation = 57,
+        alpha = 80,
         minMember = 0,
 
         reward = {

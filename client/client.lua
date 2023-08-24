@@ -1,11 +1,24 @@
-local haveAccess = false
 local locale = Config.Locales
+
+local function IsJobWhiteListed(job)
+    if Config.BlipInfo.OnlyForWhitelistedJobs then
+        if not Config.WhitelistedJobs[job] then 
+            return false 
+        else
+            return true
+        end
+    else
+        return true
+    end
+end
 
 local function setupBlip(blip, data, blipSprite)
     local zoneData = Config.Zones[data.zone]
     local ownerColour = Config.Zones[data.owner].blipData.colour
-    print(zoneData.rotation)
-    SetBlipRotation(blip, data.rotation)
+    local job = ESX.PlayerData.job.name
+    --
+    SetBlipDisplay(blip, 3)
+    SetBlipRotation(blip, zoneData.rotation)
     SetBlipColour(blip, ownerColour)
     SetBlipAlpha(blip, data.alpha)
     SetBlipAsShortRange(blip, true)
@@ -18,54 +31,40 @@ local function setupBlip(blip, data, blipSprite)
     AddTextComponentSubstringPlayerName(data.label)
     EndTextCommandSetBlipName(blipSprite)
     --
-    if Config.BlipInfo.OnlyForWhitelistedJobs then
-        local job = ESX.PlayerData.job.name
-        if not Config.WhitelistedJobs[job] then 
-            haveAccess = false 
-        else
-            haveAccess = true
-        end
-    else
-        haveAccess = true
-    end
-    --
     if Config.BlipInfo.Use then
-        if haveAccess then
-            lib.requestStreamedTextureDict("jobs", false)
-            exports['blip_info']:SetBlipInfoTitle(blipSprite, zoneData.label, false)
-            exports['blip_info']:SetBlipInfoImage(blipSprite, "jobs", data.zone)
-            exports['blip_info']:AddBlipInfoText(blipSprite, locale['owner'], tostring(Config.Zones[data.owner].label))
-            exports['blip_info']:AddBlipInfoName(blipSprite, locale['minMember'], tostring(zoneData.minMember))
-            exports['blip_info']:AddBlipInfoText(blipSprite, locale['rewards'], "")
-            
-            for item, data in pairs(exports.ox_inventory:Items()) do
-                for k,v in pairs(zoneData.reward) do
-                    if k == item then
-                        exports['blip_info']:AddBlipInfoText(blipSprite, data.label, v.."x")
-                    end
+        local haveAccess = IsJobWhiteListed(job)
+        if not haveAccess then return end
+        lib.requestStreamedTextureDict("jobs", false)
+        exports['blip_info']:SetBlipInfoTitle(blipSprite, zoneData.label, false)
+        exports['blip_info']:SetBlipInfoImage(blipSprite, "jobs", data.zone)
+        exports['blip_info']:AddBlipInfoText(blipSprite, locale['owner'], tostring(Config.Zones[data.owner].label))
+        exports['blip_info']:AddBlipInfoName(blipSprite, locale['minMember'], tostring(zoneData.minMember))
+        exports['blip_info']:AddBlipInfoText(blipSprite, locale['rewards'], "")
+        
+        for item, data in pairs(exports.ox_inventory:Items()) do
+            for k,v in pairs(zoneData.reward) do
+                if k == item then
+                    exports['blip_info']:AddBlipInfoText(blipSprite, data.label, v.."x")
                 end
             end
-
-            exports['blip_info']:AddBlipInfoHeader(blipSprite, "")
-            exports['blip_info']:AddBlipInfoText(blipSprite, locale['suggestion'])
         end
+
+        exports['blip_info']:AddBlipInfoHeader(blipSprite, "")
+        exports['blip_info']:AddBlipInfoText(blipSprite, locale['suggestion'])
     end
 end
 
 local function EnteredRaidZone(self)
-    local id = GetPlayerServerId(PlayerId())
-    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', self.zone, 'enter', id)
+    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', self.zone, 'enter', cache.serverId)
 end
 
 local function ExitedRaidZone(self)
-    local id = GetPlayerServerId(PlayerId())
-    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', self.zone, 'exit', id)
+    TriggerServerEvent('fusti_gangmap:server:refreshPlayerList', self.zone, 'exit', cache.serverId)
     Wait(1000)
     lib.hideTextUI()
 end
 
 local function InsideRaidZone(self)
-    local id = GetPlayerServerId(PlayerId())
     local zoneData = Config.Zones[self.zone]
     if IsControlJustReleased(0, Config.StartKey) then
         -- if not IsPedArmed(cache.ped, 4) then lib.notify({title = 'Információ', description = locale['no_weapon_in_hand'], type = 'error'}) return end
@@ -73,7 +72,7 @@ local function InsideRaidZone(self)
             if canStart then
                 TriggerServerEvent('fusti_gangmap:server:startRaid', zoneData)
             end
-        end, zoneData, id)
+        end, zoneData, cache.serverId)
     end
 end
 
