@@ -67,7 +67,6 @@ end
 local function InsideRaidZone(self)
     local zoneData = Config.Zones[self.zone]
     if IsControlJustReleased(0, Config.StartKey) then
-        -- if not IsPedArmed(cache.ped, 4) then lib.notify({title = 'Információ', description = locale['no_weapon_in_hand'], type = 'error'}) return end
         lib.callback('fusti_gangmap:checkStatus', false, function(canStart)
             if canStart then
                 TriggerServerEvent('fusti_gangmap:server:startRaid', zoneData)
@@ -106,9 +105,7 @@ AddEventHandler('fusti_gangmap:client:updateStatus', function(data, canRaid) -- 
         lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(locale['contested']))
         return
     end
-    print(canRaid, job, data.biggestJob, data.owner)
     if job == data.biggestJob or job == data.owner then
-        print("BELEMEGY")
         lib.showTextUI(locale['zone']:format(Config.Zones[data.zone].label)..'  \n '..locale['owner']:format(Config.Zones[data.owner].label)..'  \n '..locale['progress']:format(data.progress)..'%')
     end
 end)
@@ -116,7 +113,7 @@ end)
 RegisterNetEvent('fusti_gangmap:setupZones')
 AddEventHandler('fusti_gangmap:setupZones', function(data)
     local zoneData = Config.Zones[data.zone]
-    if not zoneData then
+    if not zoneData or not data.zone then
         return print("[ERROR] RESTART THE SCRIPT AGAIN, ZONE NEEDS TO BE REGISTERED IN DATABASE")
     end
     local blip = AddBlipForArea(zoneData.coords, zoneData.size.x, zoneData.size.y)

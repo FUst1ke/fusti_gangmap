@@ -121,8 +121,6 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data, player
     local xPlayer = ESX.GetPlayerFromId(playerId)
     local job = xPlayer.getJob().name
 
-    print("ZONE:", data.zone, "YOUR JOB:", job, "ZONE OWNER:", zoneOwner)
-
     if not Config.WhitelistedJobs[job] or zoneOwner == job then
         notify(source, locale['information'], locale['cant_do_this'], 'error')
         return false 
@@ -142,13 +140,17 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data, player
     end
 end)
 
+local function GiveReward(id, zone)
+    local ZoneData = Config.Zones[zone]
+    local Rewards = ZoneData.reward
+    local inventory = exports.ox_inventory
+    for item, amount in pairs(Rewards) do
+        inventory:AddItem(id, item, amount)
+    end
+end
+
 RegisterServerEvent('fusti_gangmap:server:stopRaid')
 AddEventHandler('fusti_gangmap:server:stopRaid', function(data, success)
-    for _,i in pairs(zoneData[data.zone][data.biggestJob]) do
-        print("_:", _, "ID: ", i)
-        local xPlayer = ESX.GetPlayerFromId(i)
-        print(xPlayer.getName())
-    end
     if success then
         data.owner = data.biggestJob
         Config.Zones[data.zone].owner = data.biggestJob
@@ -158,6 +160,9 @@ AddEventHandler('fusti_gangmap:server:stopRaid', function(data, success)
             data.biggestJob, 
             data.zone
         })
+        for _,i in pairs(zoneData[data.zone][data.biggestJob]) do
+            GiveReward(i, data.zone)
+        end
     end
     time = os.time()
     zoneInRaid[data.zone] = false
@@ -193,4 +198,5 @@ AddEventHandler('fusti_gangmap:server:refreshPlayerList', function(zone, type, i
         newJob[#newJob + 1] = id
     end
     biggestJob = getBiggestJob(zoneData[zone])
+    print(json.encode(zoneData[zone], {indent = true}))
 end)
