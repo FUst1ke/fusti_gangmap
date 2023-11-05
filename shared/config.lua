@@ -15,7 +15,6 @@ Config.Locales = {
         ['contested'] = 'Contested'
     },
     -- general
-    ['no_weapon_in_hand'] = 'You dont have a weapon on you!',
     ['information'] = 'Information',
     ['raid_defended'] = 'You have successfully defended your zone!',
     ['no_enough_member'] = 'There are not enough players to start the raid.',
@@ -23,6 +22,7 @@ Config.Locales = {
     ['you_have_to_wait'] = 'You have to wait %s minute(s).',
     ['you_killed'] = 'You have killed player %s (%s).',
     ['raid_started'] = 'You have started a raid!',
+    ['territory_under_raid'] = 'A gang is attacking your territory!',
     ['cant_do_this'] = 'You can not do this at the moment!',
     -- blip info
     ['owner'] = 'Owner:',

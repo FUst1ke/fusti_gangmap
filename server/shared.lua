@@ -4,15 +4,14 @@ function notify(target, title, description, type, icon, position)
         description = description,
         type = type or 'inform',
         icon = icon or nil,
-        position = position or 'top'
+        position = position or 'top',
+        duration = 8000
     })
 end
 
 RegisterServerEvent('esx:onPlayerDeath')
 AddEventHandler('esx:onPlayerDeath', function(data)
     local xVictim = ESX.GetPlayerFromId(source)
-    -- local xKiller = ESX.GetPlayerFromId(data.killerServerId) -- not used
-    -- local killer = {name = xKiller.getName(), job = xKiller.getJob().label} -- not used
     local victim = {name = xVictim.getName(), job = xVictim.getJob().label}
     local zone = xVictim.getMeta('raidZone')
     local locale = Config.Locales

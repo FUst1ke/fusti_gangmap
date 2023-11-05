@@ -6,9 +6,6 @@ local started = {}
 local cooldownTime = 3600 -- ennek a formatálását majd old meg!
 local time = 0
 
--- itt majd nézd át a Config.Zones[data.zone].owner és a data.owner közti különbségeket, ugyan akkor frissíted be de nem ugyan azt adja vissza stb.(callbacknél)
--- azt is oldd meg hogy zónákon legyen a cooldown ne globálisan
-
 RegisterNetEvent('esx:playerLoaded', function(player)
     if not started[player] then
         MySQL.ready(function()
@@ -87,7 +84,7 @@ local function setRaid(inRaid, data)
             local sleep = 0
             if data.progress < 100 and not data.isPaused then
                 data.progress = data.progress + 1
-                sleep = 100
+                sleep = 1000
             elseif data.progress == 100 then
                 TriggerEvent('fusti_gangmap:server:stopRaid', data, true)
                 break
@@ -135,9 +132,9 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data, player
     elseif #ownerJobCount < data.minMember then 
         notify(source, locale['information'], locale['no_enough_member'], 'error')
         return false
-    else
-        return true 
     end
+    
+    return true 
 end)
 
 local function GiveReward(id, zone)
@@ -175,6 +172,13 @@ AddEventHandler('fusti_gangmap:server:startRaid', function(data)
     zoneInRaid[data.zone] = true
     TriggerClientEvent('fusti_gangmap:client:startRaid', -1, data)
     notify(source, locale['information'], locale['raid_started'])
+
+    local xPlayers = ESX.GetExtendedPlayers('job', data.owner)
+
+    for _,xPlayer in pairs(xPlayers) do
+        notify(xPlayer.source, locale['information'], locale['territory_under_raid'], 'inform')
+    end
+
     setRaid(true, data)
 end)
 
