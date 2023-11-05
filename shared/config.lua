@@ -2,7 +2,7 @@ Config = {}
 Config.Debug = false
 Config.StartKey = 344 -- https://docs.fivem.net/docs/game-references/controls/
 Config.DefaultColour = 5
-Config.BlipInfo = {
+Config.BlipInfo = { -- https://github.com/glitchdetector/fivem-blip-info
     Use = true,
     OnlyForWhitelistedJobs = true
 }
@@ -28,7 +28,7 @@ Config.Locales = {
     ['owner'] = 'Owner:',
     ['minMember'] = 'Minimum member to attack:',
     ['rewards'] = 'Rewards:',
-    ['suggestion'] = 'When entering the zone, use the /raid command to start the raid!'
+    ['suggestion'] = 'When entering the zone, use the specific key to start the raid!'
 }
 
 Config.WhitelistedJobs = {
