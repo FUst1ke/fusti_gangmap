@@ -3,7 +3,7 @@ local ownerThread = false
 local zoneInRaid = {}
 local zoneData = {}
 local started = {}
-local cooldownTime = 3600 -- ennek a formatálását majd old meg!
+local cooldownTime = 3600
 local time = 0
 
 RegisterNetEvent('esx:playerLoaded', function(player)
