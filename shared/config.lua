@@ -137,25 +137,5 @@ Config.Zones = {
             sprite = 310,
             scale = 1.0
         }
-    },
-    ["ambulance"] = {
-        label = 'ambulance',
-        coords = vec3(1,1,1),
-        size = vec3(1,1,1),
-        rotation = 57,
-        alpha = 80,
-        minMember = 0,
-
-        reward = {
-            ['money'] = 3500,
-            ['bread'] = 5,
-            ['water'] = 3
-        },
-
-        blipData = {
-            colour = 10, --https://docs.fivem.net/docs/game-references/blips/#blip-colors
-            sprite = 310,
-            scale = 1.0
-        }
     }
 }
