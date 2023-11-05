@@ -32,9 +32,11 @@ Config.Locales = {
 }
 
 Config.WhitelistedJobs = {
-    ['police'] = true,
-    ['ambulance'] = true,
-    ['unemployed'] = true
+    ['grove'] = true,
+    ['ballas'] = true,
+    ['vagos'] = true,
+    ['crips'] = true,
+    ['lostmc'] = true
 }
 
 Config.Zones = {
