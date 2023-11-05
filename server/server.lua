@@ -164,7 +164,7 @@ AddEventHandler('fusti_gangmap:server:stopRaid', function(data, success)
     time = os.time()
     zoneInRaid[data.zone] = false
     TriggerClientEvent('fusti_gangmap:client:stopRaid', -1, data)
-    setRaid(false, data)
+    setRaid(data)
 end)
 
 RegisterNetEvent('fusti_gangmap:server:startRaid')
@@ -179,7 +179,7 @@ AddEventHandler('fusti_gangmap:server:startRaid', function(data)
         notify(xPlayer.source, locale['information'], locale['territory_under_raid'], 'inform')
     end
 
-    setRaid(true, data)
+    setRaid(data)
 end)
 
 RegisterNetEvent('fusti_gangmap:server:refreshPlayerList')
