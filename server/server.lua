@@ -76,7 +76,7 @@ local function updateStatus(data)
     end
 end
 
-local function setRaid(inRaid, data)
+local function setRaid(data)
     local count = 0
     
     CreateThread(function()
@@ -133,7 +133,7 @@ lib.callback.register('fusti_gangmap:checkStatus', function(source, data, player
         notify(source, locale['information'], locale['no_enough_member'], 'error')
         return false
     end
-    
+
     return true 
 end)
 
