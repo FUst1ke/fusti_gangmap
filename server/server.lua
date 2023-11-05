@@ -162,8 +162,8 @@ AddEventHandler('fusti_gangmap:server:stopRaid', function(data, success)
         end
     end
     time = os.time()
+    TriggerClientEvent('fusti_gangmap:client:stopRaid', -1, data, success)
     zoneInRaid[data.zone] = false
-    TriggerClientEvent('fusti_gangmap:client:stopRaid', -1, data)
     setRaid(data)
 end)
 

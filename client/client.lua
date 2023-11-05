@@ -87,12 +87,15 @@ AddEventHandler('fusti_gangmap:client:startRaid', function(data)
 end)
 
 RegisterNetEvent('fusti_gangmap:client:stopRaid')
-AddEventHandler('fusti_gangmap:client:stopRaid', function(data)
+AddEventHandler('fusti_gangmap:client:stopRaid', function(data, success)
     local blip = Config.Zones[data.zone].blip
     local blipSprite = Config.Zones[data.zone].blipSprite
-    SetBlipFlashes(blip, false)
-    SetBlipColour(blip, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
-    SetBlipColour(blipSprite, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
+    if success then
+        SetBlipColour(blip, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
+        SetBlipColour(blipSprite, Config.Zones[data.biggestJob].blipData.colour or Config.DefaultColour)
+    else
+        SetBlipFlashes(blip, false)
+    end
     Wait(1000)
     lib.hideTextUI()
 end)
