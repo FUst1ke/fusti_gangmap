@@ -115,10 +115,10 @@ end)
 
 RegisterNetEvent('fusti_gangmap:setupZones')
 AddEventHandler('fusti_gangmap:setupZones', function(data)
-    local zoneData = Config.Zones[data.zone]
-    if data then
+    if not data then
         return print("[ERROR] RESTART THE SCRIPT AGAIN, ZONE NEEDS TO BE REGISTERED IN DATABASE")
     end
+    local zoneData = Config.Zones[data.zone]
     local blip = AddBlipForArea(zoneData.coords, zoneData.size.x, zoneData.size.y)
     local blipSprite = AddBlipForCoord(zoneData.coords)
     Config.Zones[data.zone].blip = blip
